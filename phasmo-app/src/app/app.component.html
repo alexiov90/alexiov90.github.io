@@ -1,0 +1,134 @@
+<div class="container">
+  <div class="menu-sidebar left" [class.is-active]="isLeftMenuOpen">
+    <button class="close-button" (click)="toggleLeftMenu()">✖</button>
+    <h2 class="title is-5 ghost-font">Seleziona le prove:</h2>
+    <div class="field" *ngFor="let prova of prove">
+      <label class="checkbox">
+        <input type="checkbox" [disabled]="proveEscluse[prova]" [(ngModel)]="proveSelezionate[prova]" (change)="filtraFantasmi()">&nbsp;<span class="ghost-font">{{ prova }}</span>
+      </label>
+    </div>
+  </div>
+  <!-- Sidebar Right: Escludi le prove -->
+  <div class="menu-sidebar right" [class.is-active]="isRightMenuOpen">
+    <button class="close-button" (click)="toggleRightMenu()">✖</button>
+    <h2 class="title is-5 ghost-font">Escludi le prove:</h2>
+    <div class="field" *ngFor="let prova of prove">
+      <label class="checkbox">
+        <input type="checkbox" [(ngModel)]="proveEscluse[prova]" [disabled]="proveSelezionate[prova]" (change)="filtraFantasmi()">&nbsp;<span class="ghost-font">{{ prova }}</span>
+      </label>
+    </div>
+  </div>
+  <div class="columns is-mobile mt-4">
+    <!-- Pulsante a sinistra -->
+    <div class="column has-text-left">
+      <button class="button is-primary ghost-font" (click)="toggleLeftMenu()">Seleziona prove</button>
+    </div>
+
+    <!-- Pulsante al centro -->
+    <div class="column has-text-centered">
+      <button class="button is-white ghost-font" (click)="reset()">Reset</button>
+    </div>
+
+    <!-- Pulsante a destra -->
+    <div class="column has-text-right">
+      <button class="button is-danger ghost-font" (click)="toggleRightMenu()">Escludi prove</button>
+    </div>
+  </div>
+
+  <div class="box">
+
+    <div class="accordion">
+      <button class="accordion-button" (click)="toggleAccordion()">Weekly Challenge: {{ weeklyChallenge.challenge }} | Map: {{weeklyChallenge.map}}</button>
+      <div class="accordion-content" [class.is-active]="isAccordionOpen" #accordionContent>
+        <p><strong>Description:</strong> {{ weeklyChallenge.description }}</p>
+        <p><strong>Map:</strong> {{ weeklyChallenge.map }}</p>
+        <p><strong>Evidence:</strong> {{ weeklyChallenge.details.num_evidence }}</p>
+        <p><strong>Player Speed:</strong> {{ weeklyChallenge.details.player_speed }}%</p>
+        <p><strong>Ghost Speed:</strong> {{ weeklyChallenge.details.ghost_speed }}%</p>
+        <p><strong>Cursed Objects:</strong> {{ weeklyChallenge.details.cursed_objects.join(', ') }}</p>
+        <p><strong>Friendly Ghost:</strong> {{ weeklyChallenge.details.friendly_ghost }}</p>
+        <p><strong>Hunt Duration:</strong> {{ weeklyChallenge.details.cssettings.hunt_duration }}</p>
+        <p><strong>Starting Sanity:</strong> {{ weeklyChallenge.details.cssettings.starting_sanity }}%</p>
+        <p><strong>Sanity Pill Restoration:</strong> {{ weeklyChallenge.details.cssettings.sanity_pill_restoration }}%</p>
+        <p><strong>Sanity Drain Speed:</strong> {{ weeklyChallenge.details.cssettings.sanity_drain_speed }}%</p>
+        <div class="has-text-centered">
+          <figure class="image is-4by3">
+            <img [src]="weeklyChallenge.equipment_url" alt="Equipment Loadout">
+          </figure>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="box">
+    <h2 class="title is-4 ghost-font">Seleziona una Mappa</h2>
+    <div class="columns">
+      <div class="column is-4">
+        <div class="field">
+          <div class="control">
+            <div class="map-options">
+              <div class="mb-2" *ngFor="let map of maps">
+                <label class="radio">
+                  <input type="radio" [id]="map.name" name="mapSelection" [value]="map" (change)="selectMap(map)"
+                    [checked]="selectedMap && map.name === selectedMap.name" />&nbsp;
+                  <span class="ghost-font">{{ map.name }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="column is-8 has-text-centered">
+        <h3 class="title is-5 ghost-font">Anteprima Mappa</h3>
+        <figure class="image is-4by3" *ngIf="selectedMap">
+        <a [href]="'assets/maps/'+selectedMap.image" target="_blank">
+          <img [src]="'assets/maps/' + selectedMap.image" [alt]="selectedMap.name" />
+        </a>
+        </figure>
+      </div>
+    </div>
+  </div>
+  <!-- Galleria (miniature) -->
+  <div *ngIf="selectedMap?.name === 'Brownstone High School'" class="box">
+    <h2 class="title is-5 ghost-font">Stanze della Scuola</h2>
+    <div class="columns is-multiline is-mobile">
+      <div class="column is-3" *ngFor="let img of schoolRoomImages">
+        <figure class="image is-square gallery-thumb" (click)="openImage(img)">
+          <img [src]="'assets/maps/brownstone/' + img" alt="Stanza scuola">
+        </figure>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL POPUP con overlay -->
+  <div class="popup-overlay" *ngIf="selectedImageIndex !== null" (click)="closeImage()">
+    <div class="popup-content" (click)="$event.stopPropagation()">
+      <img
+        [src]="'assets/maps/brownstone/' + schoolRoomImages[selectedImageIndex]"
+        alt="Zoom stanza"
+        class="popup-image"
+      />
+      <p class="has-text-white has-text-centered mt-3 ghost-font">
+        Stanza {{ selectedImageIndex + 1 }} / {{ schoolRoomImages.length }}
+      </p>
+
+      <div class="popup-nav mt-2">
+        <button class="button is-light is-small ghost-font" (click)="prevImage($event)">← Indietro</button>
+        <button class="button is-light is-small" (click)="nextImage($event)">Avanti →</button>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="ghost-font">Fantasmi possibili:</h2>
+  <div class="columns is-multiline">
+    <div class="column is-4" *ngFor="let fantasma of fantasmiFiltrati">
+      <span class="ghost-font">{{fantasma.nome}}</span>
+      <a [href]="'assets/ghosts/'+fantasma.immagine" target="_blank">
+        <img [src]="'assets/ghosts/'+fantasma.immagine" [title]="fantasma.nome" [alt]="fantasma.nome">
+      </a>
+      <p>Descrizione: {{ fantasma.descrizione }}</p>
+      <p>Punto di forza: {{ fantasma.punto_di_forza }}</p>
+      <p>Debolezza: {{ fantasma.debolezza }}</p>
+      <p>Velocità: {{ fantasma.velocita }}</p>
+    </div>
+  </div>
+</div>
